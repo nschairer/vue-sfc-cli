@@ -14,6 +14,7 @@ const modulePath = path.resolve(__dirname);
 
 program
     .option('--api <host>', 'Specify host to forward requests to when hitting /api on the frontend')
+    .option('--ignore <block>', 'Ignore specific block type')
     .arguments('<component>')
     .description('Host a single .vue component with HMR using Vite')
     .action(async (component, options) => {
@@ -70,6 +71,16 @@ program
                       },
                     },
                     vue(),
+                {
+                    name: 'custom-blocks',
+                    transform(code, id) {
+                        const r = new RegExp('type=' + options.ignore);
+                        if (r.test(id)) {
+                            console.log('Ignoring block: ' + id);
+                            return 'export default comp => {}';
+                        }
+                    }
+                },
             ],
             server: {
                 host: '0.0.0.0',
